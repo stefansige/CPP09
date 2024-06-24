@@ -1,6 +1,8 @@
 #include "BitcoinExchange.hpp"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 int main(int argc, char *argv[])
 {
@@ -23,22 +25,33 @@ int main(int argc, char *argv[])
 	std::getline(file, first_line);
 	if (first_line != "date | value")
 	{
-		std::cerr << "bad input => " << first_line << "\n";
+		std::cerr << "bad format => " << first_line << "\n";
 		return 1;
 	}
-	while (file >> date >> middle >> amount)
+	std::string line;
+	while (std::getline(file, line))
 	{
+		std::stringstream ss(line);
+		ss >> date >> middle >> amount;
+		if (ss.fail())
+		{
+			std::cerr << "Error: bad input => " << line << "\n";
+			continue;
+		}
 		if (middle != "|")
 		{
-			std::cerr << "bad input => " << date << " " << middle << " " << amount << "\n";
+			std::cerr << "Error: bad input => " << date << " " << middle << " " << amount << "\n";
+			continue;
 		}
 		else if (amount < 0)
 		{
 			std::cout << "Error: not a positive number." << "\n";
+			continue;
 		}
 		else if (amount > 1000)
 		{
 			std::cout << "Error: too large a number." << "\n";
+			continue;
 		}
 		try
 		{
